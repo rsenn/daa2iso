@@ -1,0 +1,18 @@
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before daa2iso.exe all-after
+
+daa2iso.exe : daa2iso.o
+	gcc.exe daa2iso.o -O2 -s -o ./build/daa2iso.exe LzmaDec.o tinflate.o -lcomdlg32
+
+daa2iso.o : LzmaDec.o tinflate.o
+	gcc.exe -O2 -s -c src/daa2iso.c -o daa2iso.o
+
+LzmaDec.o: src/LzmaDec.c
+	gcc.exe -O2 -s -c src/LzmaDec.c -o LzmaDec.o
+
+tinflate.o: src/tinflate.c
+	gcc.exe -O2 -s -c src/tinflate.c -o tinflate.o
+
+clean: clean-custom
+	rm -f LzmaDec.o tinflate.o daa2iso.o daa2iso.exe

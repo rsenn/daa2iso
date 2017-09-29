@@ -18,6 +18,33 @@ Publishing on GitHub simplifies processes like automatic download-and-build the 
 
 You can grab the latest untouched version (0.1.7e) found on Luigi's website from [our `0.1.7e` release](https://github.com/undisk/cdi2iso/releases/tag/0.1.7e).
 
+All versions released after 0.1.7e differ from Luigi's original work, to include things like:
+
+* build documentation (see below)
+* pre-built binaries for GNU/Linux (x86|x64) and Windows (x86|x64) in the `build` directory
+* separate Makefile for Windows
+
+
+## Build
+
+If you're new to `C`/`C++` compilation, please see [our how-to about installing `gcc` and `make` commands on your system](https://github.com/undisk/guides/blob/master/install-gcc-make.md).
+
+### macOS & GNU/Linux
+
+Compile the sources to a binary named `daa2iso` (created in the `build` directory):
+
+```
+$ make
+```
+
+### Windows
+
+Compile the sources to a binary named `daa2iso.exe` (created in the `build` directory):
+
+```
+$ make -f Makefile.win
+```
+
 
 ## See also
 

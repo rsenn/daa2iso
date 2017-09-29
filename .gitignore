@@ -1,0 +1,5 @@
+LzmaDec.o
+tinflate.o
+daa2iso.o
+build/daa2iso
+build/daa2iso.exe
