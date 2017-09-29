@@ -25,6 +25,37 @@ All versions released after 0.1.7e differ from Luigi's original work, to include
 * separate Makefile for Windows
 
 
+## Usage
+
+### macOS, GNU/Linux
+
+From the command line, convert `input.daa` to `output.iso` with the following command:
+
+```
+$ daa2iso input.daa output.iso
+```
+
+Get more info:
+
+```
+$ daa2iso --help
+```
+
+### Windows
+
+From the command line, convert `input.daa` to `output.iso` with the following command:
+
+```
+$ daa2iso.exe input.daa output.iso
+```
+
+Get more info:
+
+```
+$ daa2iso.exe --help
+```
+
+
 ## Build
 
 If you're new to `C`/`C++` compilation, please see [our how-to about installing `gcc` and `make` commands on your system](https://github.com/undisk/guides/blob/master/install-gcc-make.md).
