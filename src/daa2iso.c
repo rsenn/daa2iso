@@ -125,7 +125,7 @@ void l2n_64(u64 *num);
 u32 crc32(u8 *data, int size);
 void std_err(void);
 int fgetz(u8 *data, int size, FILE *fd);
-void myexit(FILE *fdo);
+void myexit(FILE *fdo, int err);
 
 static void *SzAlloc(void *p, size_t size) { return(malloc(size)); }
 static void SzFree(void *p, void *address) { free(address); }
@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
         printf("\n"
             "Usage: %s <input.DAA/GBI> <output.ISO>\n"
             "\n", argv[0]);
-        myexit(NULL);
+        myexit(NULL, 0);
     }
 
     filei = argv[1];
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
         fclose(fdo);
         printf("- the output file already exists, do you want to overwrite it (y/N)? ");
         fgetz(ans, sizeof(ans), stdin);
-        if((ans[0] != 'y') && (ans[0] != 'Y')) myexit(NULL);
+        if((ans[0] != 'y') && (ans[0] != 'Y')) myexit(NULL, 0);
     }
     fdo = fopen(fileo, "wb");
     if(!fdo) std_err();
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
             printf("\n"
                 "Error: you must choose the first DAA file (*.part01.daa, *.part001.daa or\n"
                 "       *.daa) because this is a splitted archive\n");
-            myexit(fdo);
+            myexit(fdo, 1);
         } else {
             printf("\n"
                 "Error: wrong DAA signature (%.16s)\n"
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
             } else if(!stricmp(ans, "gbi")) {
                 daagbi = TYPE_GBI;
             } else {
-                myexit(fdo);
+                myexit(fdo, 1);
             }
         }
     }
@@ -425,7 +425,7 @@ int main(int argc, char *argv[]) {
             daa_crypt_init(pwdkey, ans, daakey);
             if(pwdcrc != crc32(pwdkey, 128)) {
                 printf("\nError: wrong password\n");
-                myexit(fdo);
+                myexit(fdo, 1);
             }
         }
         if(fseek(fdi, len - 8, SEEK_CUR)) std_err();
@@ -507,7 +507,7 @@ int main(int argc, char *argv[]) {
             }
             default: {
                 printf("\nError: unknown compression type (%d)\n", ztype);
-                myexit(fdo);
+                myexit(fdo, 1);
                 break;
             }
         }
@@ -516,7 +516,7 @@ int main(int argc, char *argv[]) {
         } else {                // other chunks
             if(len != daa.chunksize) {
                 printf("\nError: the uncompressed size doesn't match the chunksize (%08x %08x)\n", len, daa.chunksize);
-                myexit(fdo);
+                myexit(fdo, 1);
             }
         }
         myfw(fdo, out, len);
@@ -540,7 +540,7 @@ int main(int argc, char *argv[]) {
         LzmaDec_Free(&lzma, &g_Alloc);
     }
     printf("- finished\n");
-    myexit(NULL);
+    myexit(NULL, 0);
     return(0);
 }
 
@@ -765,7 +765,7 @@ FILE *daa_next(void) {
     l2n_daa(&daa);
     if(strncmp(daa.sign, "DAA VOL", 16) && strncmp(daa.sign, "GBI VOL", 16)) {
         printf("\nError: wrong DAA VOL signature (%.16s)\n", daa.sign);
-        myexit(NULL);
+        myexit(NULL, 1);
     }
     if(fseek(fd, daa.size_offset, SEEK_SET)) std_err();
 
@@ -791,7 +791,7 @@ void myfr(FILE *fd, void *data, unsigned size) {
     if(len == size) return;
     if(!multi) {
         printf("\nError: incomplete input file, can't read %u bytes\n", size);
-        myexit(NULL);
+        myexit(NULL, 1);
     }
     fclose(fd);
     fd = daa_next();
@@ -803,7 +803,7 @@ void myfr(FILE *fd, void *data, unsigned size) {
 void myfw(FILE *fd, void *data, unsigned size) {
     if(fwrite(data, 1, size, fd) == size) return;
     printf("\nError: problems during the writing of the output file, check your disk space\n");
-    myexit(fd);
+    myexit(fd, 1);
 }
 
 
@@ -819,9 +819,9 @@ int unlzma(CLzmaDec *lzma, u8 *in, u32 insz, u8 *out, u32 outsz) {
     outlen = outsz;
     if(LzmaDec_DecodeToBuf(lzma, out, &outlen, in, &inlen, LZMA_FINISH_END, &status) != SZ_OK) {
         printf("\nError: the compressed LZMA input is wrong or incomplete (%d)\n", status);
-        myexit(NULL);
+        myexit(NULL, 1);
     }
-    return(outlen);
+    return(outlen, 1);
 }
 
 
@@ -830,7 +830,7 @@ int unzip(u8 *in, u32 insz, u8 *out, u32 outsz) {
     tinf_init();
     if(tinf_uncompress(out, &outsz, in, insz, swapped_btype) != TINF_OK) {
         printf("\nError: the compressed INFLATE input is wrong or incomplete\n");
-        myexit(NULL);
+        myexit(NULL, 1);
     }
     return(outsz);
 }
@@ -975,7 +975,7 @@ u32 crc32(u8 *data, int size) {
 
 void std_err(void) {
     perror("\nError");
-    myexit(NULL);
+    myexit(NULL, 1);
 }
 
 
@@ -995,7 +995,7 @@ int fgetz(u8 *data, int size, FILE *fd) {
 
 
 
-void myexit(FILE *fdo) {
+void myexit(FILE *fdo, int err) {
     if(fdo) fclose(fdo);    // a bit useless
 #ifdef WIN32
     u8      ans[8];
@@ -1005,7 +1005,7 @@ void myexit(FILE *fdo) {
         fgetz(ans, sizeof(ans), stdin);
     }
 #endif
-    exit(1);
+    exit(err);
 }
 
 
