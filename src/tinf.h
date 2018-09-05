@@ -14,27 +14,26 @@
 
 /* calling convention */
 #ifndef TINFCC
- #ifdef __WATCOMC__
-  #define TINFCC __cdecl
- #else
-  #define TINFCC
- #endif
+#ifdef __WATCOMC__
+#define TINFCC __cdecl
+#else
+#define TINFCC
+#endif
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define TINF_OK             0
-#define TINF_DATA_ERROR    (-3)
+#define TINF_OK 0
+#define TINF_DATA_ERROR (-3)
 
 /* function prototypes */
 
 void TINFCC tinf_init();
 
-int TINFCC tinf_uncompress(void *dest, unsigned int *destLen,
-                           const void *source, unsigned int sourceLen,
-                           const unsigned int swapped_btype[3]);
+int TINFCC tinf_uncompress(
+    void* dest, unsigned int* destLen, const void* source, unsigned int sourceLen, const unsigned int swapped_btype[3]);
 
 #ifdef __cplusplus
 } /* extern "C" */
